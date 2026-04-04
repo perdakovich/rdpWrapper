@@ -95,7 +95,8 @@ namespace rdpWrapper {
       refreshTimer.Tick += TimerTick;
       refreshTimer.Interval = 1000;
 
-      Load += (_, _) => { 
+      Load += (_, _) => {
+        RestorePosition();
         RefreshSystemSettings();
         TimerTick(null, EventArgs.Empty);
         refreshTimer.Enabled = true;
@@ -170,6 +171,10 @@ namespace rdpWrapper {
               break;
           }
         };
+      };
+
+      FormClosed += (_, _) => {
+        SavePosition();
       };
 
       Updater.Subscribe(
@@ -633,6 +638,47 @@ namespace rdpWrapper {
         editWrapIniMenuItem.Enabled = btnGenerate.Enabled = generateMenuItem.Enabled = false;
       }
       btnRestartService.Enabled = restartServiceMenuItem.Enabled = enabled;
+    }
+
+    private void SavePosition() {
+      var bounds = WindowState == FormWindowState.Normal
+          ? Bounds
+          : RestoreBounds;
+      settings.SetValue("Window_X", bounds.X.ToString());
+      settings.SetValue("Window_Y", bounds.Y.ToString());
+      //settings.SetValue("Window_Width", bounds.Width.ToString());
+      settings.SetValue("Window_Height", bounds.Height.ToString());
+
+      //var state = WindowState == FormWindowState.Minimized
+      //    ? FormWindowState.Normal
+      //    : WindowState;
+      //settings.SetValue("Window_State", ((int)state).ToString());
+    }
+
+    private void RestorePosition() {
+      var x = settings.GetValue("Window_X", -1);
+      var y = settings.GetValue("Window_Y", -1);
+      var w = Width;// settings.GetValue("Window_Width", -1);
+      var h = settings.GetValue("Window_Height", -1);
+      bool hasAll = x >= 0 && y >= 0 && w >= 0 && h >= 0;
+
+      Rectangle bounds = new(x, y, w, h);
+      bool isVisible = Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(bounds));
+
+      if (hasAll && isVisible) {
+        StartPosition = FormStartPosition.Manual;
+        Bounds = bounds;
+        //var stateValue = settings.GetValue("Window_State", -1);
+        //if (stateValue > -1) {
+        //  var state = (FormWindowState)stateValue;
+        //  if (state != FormWindowState.Minimized) {
+        //    WindowState = state;
+        //  }
+        //}
+      }
+      else {
+        StartPosition = FormStartPosition.CenterScreen;
+      }
     }
   }
 }
