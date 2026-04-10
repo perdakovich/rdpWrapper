@@ -52,9 +52,9 @@ jobs:
           github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
           wait-for-completion: true
           output-artifact-directory: 'rdpWrapper/bin/signed'
-          parameters: |
-            version: ${{ toJSON(some.userinput) }}
-            myparam: "another param"
+          # parameters: |
+          #   version: ${{ toJSON(some.userinput) }}
+          #   myparam: "another param"
 
       - name: Publish build
         uses: actions/upload-artifact@v4
