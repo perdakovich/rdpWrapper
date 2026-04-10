@@ -44,9 +44,9 @@ jobs:
           name: unsigned
           path: rdpWrapper/bin/*.exe
 
-      - name: Debug secrets
-        run: |
-          echo "ORG_ID is set: ${{ secrets.SIGNPATH_ORG_ID != '' }}"
+      # - name: Debug secrets
+      #   run: |
+      #     echo "ORG_ID is set: ${{ secrets.SIGNPATH_ORG_ID != '' }}"
 
       - id: optional_step_id
         uses: signpath/github-action-submit-signing-request@v2
