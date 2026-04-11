@@ -67,20 +67,34 @@ jobs:
         with:
           name: unsigned
 
+      - name: Debug files
+        run: dir rdpWrapper/bin/signed
+
       - name: Prepare release files
         run: |
-          mkdir release
+          $source = "rdpWrapper/bin/signed"
+          $dest = "release"
 
-          for %%f in (rdpWrapper/bin/signed/*.exe) do (
-            copy "%%f" release\
-            powershell -Command "Compress-Archive -Path '%%f' -DestinationPath 'release\%%~nf.zip'"
-          )
-        shell: cmd
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+
+          Get-ChildItem -Path $source -Filter *.exe | ForEach-Object {
+              $exePath = $_.FullName
+              $exeName = $_.Name
+              $zipPath = Join-Path $dest ($_.BaseName + ".zip")
+
+              Copy-Item $exePath -Destination (Join-Path $dest $exeName)
+
+              Compress-Archive -Path $exePath -DestinationPath $zipPath -Force
+          }
+        shell: powershell
+
+      - name: Debug release files
+        run: dir release
 
       - name: Get version from exe
         id: get_version
         run: |
-          $file = Get-Item "rdpWrapper/bin/signed/rdpWrapper.exe"
+          $file = Get-Item "release/rdpWrapper.exe"
           $fullVersion = $file.VersionInfo.FileVersion
 
           $parts = $fullVersion.Split('.')
@@ -88,6 +102,10 @@ jobs:
 
           echo "version=$shortVersion" >> $env:GITHUB_OUTPUT
         shell: powershell
+
+      - name: Debug version
+        run: |
+          echo "version is set: ${{ steps.get_version.outputs.version }}"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
