@@ -52,7 +52,7 @@ jobs:
         uses: signpath/github-action-submit-signing-request@v2
         with:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
-          organization-id: '${{ secrets.SIGNPATH_ORG_ID }}'
+          organization-id: '8c0913d9-c7a0-4dbd-9bf4-24c75fda57b4'
           project-slug: 'rdpWrapper'
           signing-policy-slug: 'test-signing'
           github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
@@ -62,10 +62,48 @@ jobs:
           #   version: ${{ toJSON(some.userinput) }}
           #   myparam: "another param"
 
+      - name: Delete unsigned artifact
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: unsigned
+
+      - name: Prepare release files
+        run: |
+          mkdir release
+
+          for %%f in (rdpWrapper/bin/signed/*.exe) do (
+            copy "%%f" release\
+            powershell -Command "Compress-Archive -Path '%%f' -DestinationPath 'release\%%~nf.zip'"
+          )
+        shell: cmd
+
+      - name: Get version from exe
+        id: get_version
+        run: |
+          $file = Get-Item "rdpWrapper/bin/signed/rdpWrapper.exe"
+          $fullVersion = $file.VersionInfo.FileVersion
+
+          $parts = $fullVersion.Split('.')
+          $shortVersion = "$($parts[0]).$($parts[1]).$($parts[2])"
+
+          echo "version=$shortVersion" >> $env:GITHUB_OUTPUT
+        shell: powershell
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          name: Build ${{ steps.get_version.outputs.version }}
+          draft: true
+          files: |
+            release/*.exe
+            release/*.zip
+
       - name: Publish build
         uses: actions/upload-artifact@v4
         with:
           name: rdpWrapper
           path: |
             rdpWrapper/bin/signed
+            release/
             
