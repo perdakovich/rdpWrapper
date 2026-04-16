@@ -52,6 +52,8 @@ The application is portable and has the following features:
   - open user management (new/old style)
   - check if Microsoft Visual C++ 2015-2022 Redistributable is installed ([#7](https://github.com/sergiye/rdpWrapper/issues/7))
   - fix Microsoft account local cache ([#10](https://github.com/sergiye/rdpWrapper/issues/10))
+  - configuring display/hide of [client security warnings](https://learn.microsoft.com/en-us/windows-server/remote/remote-desktop-services/remotepc/understanding-security-warnings)
+  - configuring client USB device redirection restrictions
 
   and you can get full/lite/x64/x86 version of the application - the one that best suits your needs
 
