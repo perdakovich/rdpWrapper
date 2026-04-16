@@ -21,9 +21,9 @@ namespace rdpWrapper {
     private readonly Wrapper wrapper;
     private readonly PersistentSettings settings;
     private SupportedWrappers preferredWrapper;
-    private UserOption showAntivirusWarn;
-    private UserOption addDefenderExclusion;
-    private UserOption setFirewallRule;
+    private readonly UserOption showAntivirusWarn;
+    private readonly UserOption addDefenderExclusion;
+    private readonly UserOption setFirewallRule;
 
     public MainForm() {
 
@@ -104,6 +104,8 @@ namespace rdpWrapper {
         cbxSingleSessionPerUser.CheckedChanged += (_, _) => { wrapper.SingleSessionPerUser = cbxSingleSessionPerUser.Checked; };
         cbxAllowTSConnections.CheckedChanged += (_, _) => { wrapper.AllowTsConnections = cbxAllowTSConnections.Checked; };
         cbDontDisplayLastUser.CheckedChanged += (_, _) => { wrapper.DontDisplayLastUser = cbDontDisplayLastUser.Checked; };
+        cbxDontDisplaySecurityWarning.CheckedChanged += (_, _) => { wrapper.DontDisplaySecurityWarning = cbxDontDisplaySecurityWarning.Checked; };
+        cbxRestrictClientUsbRedirection.CheckedChanged += (_, _) => { wrapper.RestrictUsbRedirection = cbxRestrictClientUsbRedirection.Checked; };
         rgShadowOptions.SelectedIndexChanged += (_, _) => { wrapper.ShadowOptions = rgShadowOptions.SelectedIndex; };
         cbxHonorLegacy.CheckedChanged += (_, _) => { wrapper.HonorLegacy = cbxHonorLegacy.Checked; };
         cbxAllowPlaybackRedirect.CheckedChanged += (_, _) => { wrapper.AllowHostPlaybackRedirect = cbxAllowPlaybackRedirect.Checked; };
@@ -251,6 +253,8 @@ namespace rdpWrapper {
 
         rgShadowOptions.SelectedIndex = wrapper.ShadowOptions;
         cbDontDisplayLastUser.Checked = wrapper.DontDisplayLastUser;
+        cbxDontDisplaySecurityWarning.Checked = wrapper.DontDisplaySecurityWarning;
+        cbxRestrictClientUsbRedirection.Checked = wrapper.RestrictUsbRedirection.Value;
         cbxAllowPlaybackRedirect.Checked = wrapper.AllowHostPlaybackRedirect;
         cbxAllowAudioCapture.Checked = wrapper.AllowClientAudioCapture;
         cbxAllowVideoCapture.Checked = wrapper.AllowClientVideoCapture;

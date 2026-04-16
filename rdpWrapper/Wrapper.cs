@@ -49,7 +49,8 @@ namespace rdpWrapper {
     private const string ValueDisableAudioCapture = "fDisableAudioCapture";
     private const string ValueDisablePNPRedir = "fDisablePNPRedir";
     private const string ValueUsbRedirectionEnableMode = "fUsbRedirectionEnableMode";
-    
+    private const string ValueRedirectionWarningDialogVersion = "RedirectionWarningDialogVersion";
+
     private const string RdpServiceName = "TermService";
     
     internal const string RdpWrapIniName = "rdpwrap.ini";
@@ -330,6 +331,19 @@ namespace rdpWrapper {
             }
           }
         }
+      }
+    }
+
+    internal bool DontDisplaySecurityWarning {
+      get {
+        using (var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, registryView))
+        using (var key = baseKey.OpenSubKey(RegTsKey + "\\Client"))
+          return key != null && Convert.ToInt32(key.GetValue(ValueRedirectionWarningDialogVersion, 0)) != 0;
+      }
+      set {
+        using (var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, registryView))
+        using (var key = baseKey.OpenSubKey(RegTsKey + "\\Client", writable: true))
+          key?.SetValue(ValueRedirectionWarningDialogVersion, value ? 1 : 0, RegistryValueKind.DWord);
       }
     }
 
