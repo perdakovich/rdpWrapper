@@ -25,6 +25,11 @@ jobs:
             buildprops:
               - 'Directory.Build.props'
 
+      - name: Detect signing configuration
+        id: signing
+        shell: bash
+        run: echo "enabled=${{ secrets.SIGNPATH_API_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
+
       - name: Restore (locked)
         run: dotnet restore rdpWrapper.sln --locked-mode --verbosity minimal
 
@@ -42,12 +47,14 @@ jobs:
 
       - name: upload-unsigned-artifact
         id: upload-unsigned-artifact
+        if: steps.signing.outputs.enabled == 'true'
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: unsigned
           path: rdpWrapper/bin/*.exe
 
       - id: optional_step_id
+        if: steps.signing.outputs.enabled == 'true'
         uses: signpath/github-action-submit-signing-request@v2
         with:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
@@ -62,16 +69,28 @@ jobs:
           #   myparam: "another param"
 
       - name: Delete unsigned artifact
+        if: steps.signing.outputs.enabled == 'true'
         uses: geekyeggo/delete-artifact@v5
         with:
           name: unsigned
 
       - name: Debug files
-        run: dir rdpWrapper/bin/signed
+        shell: powershell
+        run: |
+          if ('${{ steps.signing.outputs.enabled }}' -eq 'true') {
+              dir rdpWrapper/bin/signed
+          } else {
+              dir rdpWrapper/bin
+          }
 
       - name: Prepare release files
+        shell: powershell
         run: |
-          $source = "rdpWrapper/bin/signed"
+          if ('${{ steps.signing.outputs.enabled }}' -eq 'true') {
+              $source = "rdpWrapper/bin/signed"
+          } else {
+              $source = "rdpWrapper/bin"
+          }
           $dest = "release"
 
           New-Item -ItemType Directory -Force -Path $dest | Out-Null
@@ -85,7 +104,6 @@ jobs:
 
               Compress-Archive -Path $exePath -DestinationPath $zipPath -Force
           }
-        shell: powershell
 
       - name: Debug release files
         run: dir release
@@ -110,7 +128,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
-          name: Build ${{ steps.get_version.outputs.version }}
+          name: Build ${{ steps.get_version.outputs.version }}${{ steps.signing.outputs.enabled == 'true' && '' || ' (unsigned)' }}
           draft: true
           files: |
             release/*.exe
@@ -122,4 +140,6 @@ jobs:
           name: rdpWrapper
           path: |
             rdpWrapper/bin/signed
+            rdpWrapper/bin/*.exe
             release/
+          if-no-files-found: warn
