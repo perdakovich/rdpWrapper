@@ -4,23 +4,16 @@
 </p>
 
 ---
-
 <p align="center">
     <a href="https://endoflife.date/windows"><img src="https://img.shields.io/badge/WINDOWS-7%20%E2%80%93%2011-blue?style=for-the-badge" alt="WINDOWS 7 – 11"></a>
     <a href="https://endoflife.date/windows-server"><img src="https://img.shields.io/badge/SERVER-2012%20%E2%80%93%202025-blue?style=for-the-badge" alt="SERVER 2012 – 2025"></a>
 </p>
-
-<div align="center">
-
-Это форк проекта [sergiye/rdpWrapper](https://github.com/sergiye/rdpWrapper),
-ориентированный на долгосрочную стабильность и безопасность цепочки поставки.  
-В нём **устранены географические ограничения**, поэтому
-приложение запускается и работает на любой системе вне зависимости от региона, языка
-или часового пояса пользователя.  
-Зависимости от внешних пакетов зафиксированы по версиям и обновляются
-только после ручного аудита изменений в оригинальном проекте. Исключена вероятность превращения проекта в protestware (саботаж, удаление данных и прочие нежелательные сюрпризы) на фоне политических мотивов автора.
-
-</div>
+<p align="center">
+    <b><a href="README.md">English</a></b> | <b><a href="README_ru.md">Русский</a></b>
+</p>
+<p align="center">
+    <b><a href="#установка">Установка</a></b>
+</p>
 
 ## Описание
 
@@ -30,7 +23,7 @@
 но написан на чистом .NET вместо Pascal/Delphi.
 Основная идея -- создать минималистичную портативную программу со всем необходимым функционалом.
 
-И да, он умеет автоматически генерировать смещения для новых/обновлённых версий Windows -- спасибо проектам [llccd](https://github.com/llccd):
+И да, он умеет автоматически генерировать смещения для новых/обновлённых версий Windows -- спасибо проектам от [llccd](https://github.com/llccd):
   - [TermWrap](https://github.com/llccd/TermWrap)
   - [RDPWrapOffsetFinder](https://github.com/llccd/RDPWrapOffsetFinder).
 
@@ -85,21 +78,21 @@ RDP Wrapper работает как прослойка между Service Contro
 Пример содержимого пользовательского файла темы:
 ```json
 {
-   "DisplayName": "Custom Theme",
-   "DarkMode": true,
-   "BackgroundColor": "#1E1E1E",
-   "ForegroundColor": "#E9E9E9",
-   "HyperlinkColor": "#00D980",
-   "SelectedBackgroundColor": "#4CBB17",
-   "SelectedForegroundColor": "#000000",
-   "LineColor": "#262626",
-   "StrongLineColor": "#454545",
-   "WarnColor": "#FF4500"
+  "DisplayName": "Custom Theme",
+  "DarkMode": true,
+  "BackgroundColor": "#1E1E1E",
+  "ForegroundColor": "#E9E9E9",
+  "HyperlinkColor": "#00D980",
+  "SelectedBackgroundColor": "#4CBB17",
+  "SelectedForegroundColor": "#000000",
+  "LineColor": "#262626",
+  "StrongLineColor": "#454545",
+  "WarnColor": "#FF4500"
 }
 ```
 Не забудьте перезапустить приложение, чтобы оно подхватило новые файлы тем!
 
-## Загрузка
+## Установка
 
 Сборки публикуются на [странице релизов](https://github.com/perdakovich/rdpWrapper/releases).
 
@@ -109,7 +102,7 @@ RDP Wrapper работает как прослойка между Service Contro
 
 > [!IMPORTANT]
 > Если Defender или другой антивирус посчитал какую-то часть RdpWrapper вредоносной, это может помешать работе или привести к тому, что приложение не запустится.
-> Если необходимый файл существует, но загрузка его заблокирована -- RdpWrapper не запустится.
+> Если необходимый файл существует, но его загрузка заблокирована -- RdpWrapper не запустится.
 > Настоятельно рекомендуется добавить бинарники RdpWrapper в исключения антивируса.
 
 
@@ -146,6 +139,18 @@ Add-MpPreference -ExclusionPath "c:\Program Files\RDP Wrapper\"
 
 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\AudioEnumeratorDll`
 
+## О проекте
+
+Это форк проекта [sergiye/rdpWrapper](https://github.com/sergiye/rdpWrapper),
+ориентированный на долгосрочную стабильность и безопасность цепочки поставки.  
+В нём **устранены географические ограничения**, поэтому
+приложение запускается и работает на любой системе вне зависимости от региона, языка
+или часового пояса пользователя.  
+Зависимости от внешних пакетов зафиксированы по версиям и обновляются
+только после ручного аудита изменений в оригинальном проекте. Исключена вероятность превращения проекта в protestware (саботаж, удаление данных и прочие нежелательные сюрпризы) на фоне политических мотивов автора.
+
+Ознакомиться с полным списком внесённых изменений можно здесь:  
+https://github.com/perdakovich/rdpWrapper/compare
 
 ## Как я могу помочь?
 
