@@ -4,10 +4,18 @@ on:
   push:
     branches: [master]
   workflow_dispatch:
+    inputs:
+      create_release:
+        description: Create a draft GitHub release
+        type: boolean
+        default: true
 
 jobs:
   build:
     runs-on: windows-2022
+    permissions:
+      actions: write
+      contents: write
     environment: production
     steps:
       - uses: actions/checkout@v4
@@ -15,131 +23,78 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - uses: microsoft/setup-msbuild@v1.1
-        with:
-          msbuild-architecture: x64
-
-      - uses: dorny/paths-filter@v2
-        id: changes
-        with:
-          filters: |
-            buildprops:
-              - 'Directory.Build.props'
 
       - name: Detect signing configuration
         id: signing
         shell: bash
-        run: echo "enabled=${{ secrets.SIGNPATH_API_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
+        run: echo "enabled=${{ secrets.SIGNPATH_API_TOKEN != '' && vars.SIGNPATH_ORGANIZATION_ID != '' && vars.SIGNPATH_PROJECT_SLUG != '' && vars.SIGNPATH_SIGNING_POLICY_SLUG != '' }}" >> "$GITHUB_OUTPUT"
 
-      - name: Restore (locked)
-        run: dotnet restore rdpWrapper.sln --locked-mode --verbosity minimal
-
-      - name: Build
+      - name: Restore and Build
+        shell: pwsh
         run: |
-          msbuild rdpWrapper.sln /t:restore /p:RestoreLockedMode=true /p:RestorePackagesConfig=true /p:Configuration=Release /p:Platform="Any CPU"
-          msbuild rdpWrapper.sln /t:Rebuild /p:DebugType=None /p:Configuration=Release /p:Platform="Any CPU"
-          msbuild rdpWrapper.sln /t:Rebuild /p:DebugType=None /p:Configuration=ReleaseLite /p:Platform="Any CPU"
-          msbuild rdpWrapper.sln /t:restore /p:RestoreLockedMode=true /p:RestorePackagesConfig=true /p:Configuration=Release /p:Platform="x64"
-          msbuild rdpWrapper.sln /t:Rebuild /p:DebugType=None /p:Configuration=Release /p:Platform="x64"
-          msbuild rdpWrapper.sln /t:Rebuild /p:DebugType=None /p:Configuration=ReleaseLite /p:Platform="x64"
-          msbuild rdpWrapper.sln /t:restore /p:RestoreLockedMode=true /p:RestorePackagesConfig=true /p:Configuration=Release /p:Platform="x86"
-          msbuild rdpWrapper.sln /t:Rebuild /p:DebugType=None /p:Configuration=Release /p:Platform="x86"
-          msbuild rdpWrapper.sln /t:Rebuild /p:DebugType=None /p:Configuration=ReleaseLite /p:Platform="x86"
+          $platforms = "Any CPU", "x64", "x86"
+          $configs = "Release", "ReleaseLite"
+          foreach ($p in $platforms) {
+            foreach ($c in $configs) {
+              msbuild rdpWrapper.sln -restore /t:Rebuild /m /p:Configuration=$c /p:Platform="$p" /p:DebugType=None /p:RestoreLockedMode=true
+            }
+          }
 
-      - name: upload-unsigned-artifact
-        id: upload-unsigned-artifact
+      - name: Upload for signing
         if: steps.signing.outputs.enabled == 'true'
+        id: upload-unsigned-artifact
         uses: actions/upload-artifact@v4
         with:
           name: unsigned
           path: rdpWrapper/bin/*.exe
 
-      - id: optional_step_id
+      - name: Request signing
         if: steps.signing.outputs.enabled == 'true'
         uses: signpath/github-action-submit-signing-request@v2
         with:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
-          organization-id: '8c0913d9-c7a0-4dbd-9bf4-24c75fda57b4'
-          project-slug: 'rdpWrapper'
-          signing-policy-slug: 'test-signing'
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
           github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
           wait-for-completion: true
           output-artifact-directory: 'rdpWrapper/bin/signed'
-          # parameters: |
-          #   version: ${{ toJSON(some.userinput) }}
-          #   myparam: "another param"
 
-      - name: Delete unsigned artifact
+      - name: Package release files
+        id: pkg
+        shell: powershell
+        env:
+          SRC: ${{ steps.signing.outputs.enabled == 'true' && 'rdpWrapper/bin/signed' || 'rdpWrapper/bin' }}
+        run: |
+          $dest = "release"
+          New-Item -ItemType Directory -Force $dest | Out-Null
+
+          Get-ChildItem -Path $env:SRC -Filter *.exe | ForEach-Object {
+              Copy-Item $_.FullName -Destination "$dest/$($_.Name)"
+              Compress-Archive -Path $_.FullName -DestinationPath "$dest/$($_.BaseName).zip" -Force
+          }
+
+          $v = (Get-Item "$dest/rdpWrapper.exe").VersionInfo.FileVersion
+          echo "version=$($v.Split('.')[0..2] -join '.')" >> $env:GITHUB_OUTPUT
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rdpwrapper-${{ steps.pkg.outputs.version }}-${{ steps.signing.outputs.enabled == 'true' && 'signed' || 'unsigned' }}
+          path: release/*
+
+      - name: Create draft Release
+        if: github.event_name == 'workflow_dispatch' && inputs.create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.pkg.outputs.version }}
+          name: ${{ steps.pkg.outputs.version }}${{ steps.signing.outputs.enabled == 'true' && '' || ' (unsigned)' }}
+          draft: true
+          body: "_Draft build generated via workflow dispatch${{ steps.signing.outputs.enabled != 'true' && ' (unsigned)' || '' }}_"
+          files: release/*
+
+      - name: Cleanup artifacts
         if: steps.signing.outputs.enabled == 'true'
         uses: geekyeggo/delete-artifact@v5
         with:
           name: unsigned
-
-      - name: Debug files
-        shell: powershell
-        run: |
-          if ('${{ steps.signing.outputs.enabled }}' -eq 'true') {
-              dir rdpWrapper/bin/signed
-          } else {
-              dir rdpWrapper/bin
-          }
-
-      - name: Prepare release files
-        shell: powershell
-        run: |
-          if ('${{ steps.signing.outputs.enabled }}' -eq 'true') {
-              $source = "rdpWrapper/bin/signed"
-          } else {
-              $source = "rdpWrapper/bin"
-          }
-          $dest = "release"
-
-          New-Item -ItemType Directory -Force -Path $dest | Out-Null
-
-          Get-ChildItem -Path $source -Filter *.exe | ForEach-Object {
-              $exePath = $_.FullName
-              $exeName = $_.Name
-              $zipPath = Join-Path $dest ($_.BaseName + ".zip")
-
-              Copy-Item $exePath -Destination (Join-Path $dest $exeName)
-
-              Compress-Archive -Path $exePath -DestinationPath $zipPath -Force
-          }
-
-      - name: Debug release files
-        run: dir release
-
-      - name: Get version from exe
-        id: get_version
-        run: |
-          $file = Get-Item "release/rdpWrapper.exe"
-          $fullVersion = $file.VersionInfo.FileVersion
-
-          $parts = $fullVersion.Split('.')
-          $shortVersion = "$($parts[0]).$($parts[1]).$($parts[2])"
-
-          echo "version=$shortVersion" >> $env:GITHUB_OUTPUT
-        shell: powershell
-
-      - name: Debug version
-        run: |
-          echo "version is set: ${{ steps.get_version.outputs.version }}"
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.get_version.outputs.version }}
-          name: Build ${{ steps.get_version.outputs.version }}${{ steps.signing.outputs.enabled == 'true' && '' || ' (unsigned)' }}
-          draft: true
-          files: |
-            release/*.exe
-            release/*.zip
-
-      - name: Publish build
-        uses: actions/upload-artifact@v4
-        with:
-          name: rdpWrapper
-          path: |
-            rdpWrapper/bin/signed
-            rdpWrapper/bin/*.exe
-            release/
-          if-no-files-found: warn
