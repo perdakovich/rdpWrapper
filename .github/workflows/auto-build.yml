@@ -3,6 +3,13 @@ name: Auto Build
 on:
   push:
     branches: [master]
+    paths-ignore:
+      - '**.md'
+      - '**.png'
+      - 'LICENSE.txt'
+      - '.gitignore'
+      - 'clean.cmd'
+      - 'make.bat'
   workflow_dispatch:
     inputs:
       create_release:
