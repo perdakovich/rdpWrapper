@@ -91,7 +91,7 @@ Don't forget to restart the app to scan for new theme files!
 
 ## Download
 
-The published version can be obtained from [releases](https://github.com/sergiye/rdpWrapper/releases).
+The published version can be obtained from [releases](https://github.com/perdakovich/rdpWrapper/releases).
 
 > [!WARNING]
 > Microsoft and other major antivirus vendors have flagged RdpWrapper as "malware". This is likely due to Microsoft's financial interests and the resulting attitude toward RdpWrapper, not because it contains a virus or such. Flags from Microsoft usually spread to other antivirus vendors.
@@ -136,20 +136,25 @@ To enable audio recording redirection, both EndpWrap.dll and Zydis.dll needs to 
 
 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\AudioEnumeratorDll`
 
+## About
+
+This is a fork of [sergiye/rdpWrapper](https://github.com/sergiye/rdpWrapper),
+oriented toward long-term stability and supply-chain safety.  
+It also fixes a few bugs, so the application starts and runs on any system
+regardless of the user's region, language or timezone.  
+Vendor dependencies are pinned by version and are updated only after a
+manual audit of upstream changes.
+
+See the full list of changes:  
+https://github.com/perdakovich/rdpWrapper/compare
+
 ## How can I help improve it?
 
-The rdpWrapper team welcomes feedback and contributions!<br/>
-You can check if it works properly on your PC. If you notice any inaccuracies, please send us a pull request. If you have any suggestions or improvements, don't hesitate to create an issue.
+Report issues with this build:  
+https://github.com/perdakovich/rdpWrapper/issues
 
-Also, don't forget to ★ star ★ the repository to help other people find it.
+Contribute to the upstream:  
+https://github.com/sergiye/rdpWrapper
 
-<!-- [![Star History Chart](https://api.star-history.com/svg?repos=sergiye/rdpwrapper&type=Date)](https://star-history.com/#sergiye/rdpwrapper&Date) -->
-
-[//]: # ([![Stargazers over time]&#40;https://starchart.cc/sergiye/rdpwrapper.svg?variant=adaptive&#41;]&#40;https://starchart.cc/sergiye/rdpwrapper&#41;)
-
-<!-- [![Stargazers](https://reporoster.com/stars/sergiye/rdpWrapper)](https://star-history.com/#sergiye/rdpWrapper&Date) -->
-
-<!-- [![Forkers](https://reporoster.com/forks/sergiye/rdpWrapper)](https://github.com/sergiye/rdpWrapper/network/members) -->
-
-## Donate!
-Every [cup of coffee](https://patreon.com/SergiyE) you donate will help this app become better and let me know that this project is in demand.
+Donate to Sergiy:  
+https://patreon.com/SergiyE

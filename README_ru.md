@@ -91,7 +91,7 @@ RDP Wrapper работает как прослойка между Service Contro
 
 ## Установка
 
-Сборки публикуются на [странице релизов](https://github.com/sergiye/rdpWrapper/releases).
+Сборки публикуются на [странице релизов](https://github.com/perdakovich/rdpWrapper/releases).
 
 > [!WARNING]
 > Microsoft помечают RdpWrapper как «вредоносное ПО». Скорее всего, это связано с финансовыми интересами Microsoft и вытекающим отношением к RdpWrapper, а не с тем, что в нём действительно есть вирус. Метки от Microsoft обычно расходятся и по другим антивирусным вендорам.
@@ -136,20 +136,26 @@ Add-MpPreference -ExclusionPath "c:\Program Files\RDP Wrapper\"
 
 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\AudioEnumeratorDll`
 
+## О проекте
+
+Это форк проекта [sergiye/rdpWrapper](https://github.com/sergiye/rdpWrapper),
+ориентированный на долгосрочную стабильность и безопасность цепочки поставки.  
+В нём также устранены некоторые баги, поэтому
+приложение запускается и работает на любой системе вне зависимости от региона, языка
+или часового пояса пользователя.  
+Зависимости от внешних пакетов зафиксированы по версиям и обновляются
+только после ручного аудита изменений в оригинальном проекте.
+
+Ознакомиться с полным списком внесённых изменений можно здесь:  
+https://github.com/perdakovich/rdpWrapper/compare
+
 ## Как я могу помочь?
 
-Команда rdpWrapper приветствует обратную связь и вклад в проект!<br/>
-Вы можете проверить, как всё работает на вашем ПК. Если заметили неточности, отправьте pull request. Если есть идеи или улучшения, смело открывайте issue.
+Если вы столкнулись с проблемой, используя эту сборку, сообщите об этом здесь:  
+https://github.com/perdakovich/rdpWrapper/issues
 
-Также не забудьте поставить ★ звезду ★ репозиторию, чтобы другим пользователям было проще его найти.
+Внесите свой вклад в разработку оригинального проекта:  
+https://github.com/sergiye/rdpWrapper
 
-<!-- [![Star History Chart](https://api.star-history.com/svg?repos=sergiye/rdpwrapper&type=Date)](https://star-history.com/#sergiye/rdpwrapper&Date) -->
-
-[//]: # ([![Stargazers over time]&#40;https://starchart.cc/sergiye/rdpwrapper.svg?variant=adaptive&#41;]&#40;https://starchart.cc/sergiye/rdpwrapper&#41;)
-
-<!-- [![Stargazers](https://reporoster.com/stars/sergiye/rdpWrapper)](https://star-history.com/#sergiye/rdpWrapper&Date) -->
-
-<!-- [![Forkers](https://reporoster.com/forks/sergiye/rdpWrapper)](https://github.com/sergiye/rdpWrapper/network/members) -->
-
-## Поддержка
-Любая [чашка кофе](https://patreon.com/SergiyE) помогает проекту становиться лучше и показывает, что он востребован.
+Вы можете помочь разработчику здесь:  
+https://patreon.com/SergiyE
