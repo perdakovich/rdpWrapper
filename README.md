@@ -1,3 +1,8 @@
+<p align="center">
+    <img src="icon.png" alt="icon" width="128" align="middle"/>  
+    <img src="logo.png" alt="logo" width="128" align="middle"/>
+</p>
+
 ---
 <p align="center">
     <a href="https://endoflife.date/windows"><img src="https://img.shields.io/badge/WINDOWS-7%20%E2%80%93%2011-blue?style=for-the-badge" alt="WINDOWS 7 – 11"></a>
