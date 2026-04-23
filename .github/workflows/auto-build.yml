@@ -78,7 +78,6 @@ jobs:
 
           Get-ChildItem -Path $env:SRC -Filter *.exe | ForEach-Object {
               Copy-Item $_.FullName -Destination "$dest/$($_.Name)"
-              Compress-Archive -Path $_.FullName -DestinationPath "$dest/$($_.BaseName).zip" -Force
           }
 
           $v = (Get-Item "$dest/rdpWrapper.exe").VersionInfo.FileVersion
@@ -97,7 +96,23 @@ jobs:
           tag_name: ${{ steps.pkg.outputs.version }}
           name: ${{ steps.pkg.outputs.version }}${{ steps.signing.outputs.enabled == 'true' && '' || ' (unsigned)' }}
           draft: true
-          body: "_Draft build generated via workflow dispatch${{ steps.signing.outputs.enabled != 'true' && ' (unsigned)' || '' }}_"
+          body: |
+            _Build generated via workflow dispatch${{ steps.signing.outputs.enabled == 'true' && '' || ' (unsigned)' }}_
+
+            > [!IMPORTANT]
+            > Recommended reading before download: [FAQ & Troubleshooting](${{ github.server_url }}/${{ github.repository }}#download) issues regarding antivirus detection.
+
+            ---
+
+            Unsure which variant to choose? Use the standard **[rdpWrapper.exe](${{ github.server_url }}/${{ github.repository }}/releases/download/${{ steps.pkg.outputs.version }}/rdpWrapper.exe)**
+
+            ---
+
+            Changelog:
+            ${{ github.server_url }}/${{ github.repository }}/commits/${{ steps.pkg.outputs.version }}
+
+            Report issues with this build:
+            ${{ github.server_url }}/${{ github.repository }}/issues
           files: release/*
 
       - name: Cleanup artifacts
